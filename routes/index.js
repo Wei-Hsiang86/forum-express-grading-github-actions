@@ -4,9 +4,13 @@ const router = express.Router()
 const admin = require('./modules/admin')
 
 const restController = require('../controllers/restaurant-controller')
+const userController = require('../controllers/user-controller')
 
 // 寫路由要注意，條件複雜的判斷網上放，簡單的往下擺
 router.use('/admin', admin)
+
+router.get('/signup', userController.signUpPage)
+router.post('/signup', userController.signUp)
 
 router.get('/restaurants', restController.getRestaurants)
 // 設定 fallback 路由，意義為其他路由條件都不符合時，最終會通過的路由
