@@ -41,6 +41,18 @@ const userController = {
       .catch(err => next(err))
       // 在 express 中，next() 如果有參數，就代表拋出錯誤
       // 接住前面拋出的錯誤，呼叫專門做錯誤處理的 middleware
+  },
+  signInPage: (req, res) => {
+    res.render('signin')
+  },
+  signIn: (req, res) => {
+    req.flash('success_messages', '成功登入！')
+    res.redirect('/restaurants')
+  },
+  logout: (req, res) => {
+    req.flash('success_messages', '登出成功！')
+    req.logout() // 使用 passport 提供的 function，把目前 session ID 對應的 session 清除，對 server 而言就是登出了
+    res.redirect('/signin')
   }
 }
 
