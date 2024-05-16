@@ -41,7 +41,45 @@ const adminController = {
     })
       .then(restaurant => {
         if (!restaurant) throw new Error("Restaurant didn't exist!") //  如果找不到，回傳錯誤訊息，後面不執行
+
         res.render('admin/restaurant', { restaurant })
+      })
+      .catch(err => next(err))
+  },
+  editRestaurant: (req, res, next) => {
+    Restaurant.findByPk(req.params.id, {
+      raw: true
+    })
+      .then(restaurant => {
+        if (!restaurant) throw new Error("Restaurant didn't exist!")
+
+        res.render('admin/edit-restaurant', { restaurant })
+      })
+      .catch(err => next(err))
+  },
+  putRestaurant: (req, res, next) => {
+    const { name, tel, address, openingHours, description } = req.body
+    // 一樣確保 name 欄位有填入資料
+    if (!name) throw new Error('Restaurant name is required!')
+
+    Restaurant.findByPk(req.params.id)
+      .then(restaurant => {
+        // 確保修改的這間餐廳是存在的
+        if (!restaurant) throw new Error("Restaurant didn't exist!")
+
+        // 成功就更新資料。且因為要使用 sequelize 功能，所以不用加 raw
+        // 另外這裡的 return 一樣是避免 .then 巢狀下去
+        return restaurant.update({
+          name,
+          tel,
+          address,
+          openingHours,
+          description
+        })
+      })
+      .then(() => {
+        req.flash('success_messages', 'restaurant was successfully to update')
+        res.redirect('/admin/restaurants')
       })
       .catch(err => next(err))
   }
