@@ -2,6 +2,7 @@ const { Restaurant } = require('../models')
 // 解構賦值，等於下面兩行
 // const db = require('../models')
 // const Restaurant = db.Restaurant
+const { User } = require('../models')
 const { localFileHandler } = require('../helpers/file-helpers')
 
 const adminController = {
@@ -10,8 +11,9 @@ const adminController = {
       raw: true
       // 使用 raw，因為後續不需要繼續操作 sequelize，所以不用取得他幫我們包好的物件，只要單純的 json 格式就好
     })
-      .then(restaurants => res.render('admin/restaurants', { restaurants }))
-      // 如果物件的名字，和其屬性名稱一樣，那就可以簡寫成上面那樣
+      // 如果物件的名字，和其屬性名稱一樣，那就可以簡寫成下面那樣
+      .then(restaurants =>
+        res.render('admin/restaurants', { restaurants }))
       .catch(err => next(err))
   },
   createRestaurant: (req, res) => {
@@ -77,6 +79,7 @@ const adminController = {
     ])
       .then(([restaurant, filePath]) => { // 以上兩樣事都做完以後
         if (!restaurant) throw new Error("Restaurant didn't exist!")
+
         return restaurant.update({ // 修改這筆資料
           name,
           tel,
@@ -100,6 +103,44 @@ const adminController = {
         return restaurant.destroy()
       })
       .then(() => res.redirect('/admin/restaurants'))
+      .catch(err => next(err))
+  },
+  getUsers: (req, res, next) => {
+    return User.findAll({
+      raw: true
+    })
+      .then(users => {
+        users.forEach((user, index, newUsers) => {
+          if (newUsers[index].isAdmin === 1) {
+            newUsers[index].isAdmin = 'admin'
+            newUsers[index].switch = 'set as user'
+          } else {
+            newUsers[index].isAdmin = 'user'
+            newUsers[index].switch = 'set as admin'
+          }
+        })
+
+        res.render('admin/users', { users })
+      })
+      .catch(err => next(err))
+  },
+  patchUser: (req, res, next) => {
+    return User.findByPk(req.params.id)
+      .then(user => {
+        if (!user) throw new Error("User didn't exist!")
+        if (user.email === 'root@example.com') {
+          req.flash('error_messages', '禁止變更 root 權限')
+          return res.redirect('back')
+        }
+
+        return user.update({
+          isAdmin: !user.isAdmin
+        })
+      })
+      .then(() => {
+        req.flash('success_messages', '使用者權限變更成功')
+        res.redirect('/admin/users')
+      })
       .catch(err => next(err))
   }
 }

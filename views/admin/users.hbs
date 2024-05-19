@@ -1,0 +1,36 @@
+{{!-- 使用者列表頁 --}}
+<h1>餐廳後台</h1>
+{{> admin-restaurant-user-switch}}
+
+{{!-- 也許需要一個新增使用者按鈕 --}}
+
+<br />
+<br />
+
+<table class="table align-middle">
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Name</th>
+      <th scope="col">Email</th>
+      <th scope="col">Role</th>
+      <th scope="col">#</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each users}}
+    <tr>
+      <th scope="row">{{this.id}}</th>
+      <td>{{this.name}}</td>
+      <td>{{this.email}}</td>
+      <td>{{this.isAdmin}}</td>
+      <td>
+        {{!-- 轉換角色功能 --}}
+        <form action="/admin/users/{{this.id}}?_method=PATCH" method="POST" style="display: inline;">
+          <button type="submit" class="btn btn-link link-danger" onclick="return confirm(`確定要調整 {{ this.name }} 的角色嗎？`)">{{this.switch}}</button>
+        </form>
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
