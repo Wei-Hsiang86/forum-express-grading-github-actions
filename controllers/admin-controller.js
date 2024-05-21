@@ -1,15 +1,20 @@
-const { Restaurant } = require('../models')
-// 解構賦值，等於下面兩行
+const { Restaurant, User, Category } = require('../models')
+// 解構賦值，等於下面幾行
 // const db = require('../models')
 // const Restaurant = db.Restaurant
-const { User } = require('../models')
+// const User = db.User
+// ...
 const { localFileHandler } = require('../helpers/file-helpers')
 
 const adminController = {
   getRestaurants: (req, res, next) => {
     Restaurant.findAll({
-      raw: true
       // 使用 raw，因為後續不需要繼續操作 sequelize，所以不用取得他幫我們包好的物件，只要單純的 json 格式就好
+      raw: true,
+      // 會讓底下的物件巢狀包起來
+      nest: true,
+      // 把有關聯的資料都引入進來
+      include: [Category]
     })
       // 如果物件的名字，和其屬性名稱一樣，那就可以簡寫成下面那樣
       .then(restaurants =>
@@ -46,7 +51,9 @@ const adminController = {
   },
   getRestaurant: (req, res, next) => {
     Restaurant.findByPk(req.params.id, { // 去資料庫用 id 找一筆資料 (依據路徑的名字為屬性名稱)
-      raw: true // 找到以後整理格式再回傳
+      raw: true, // 找到以後整理格式再回傳
+      nest: true,
+      include: [Category]
     })
       .then(restaurant => {
         if (!restaurant) throw new Error("Restaurant didn't exist!") //  如果找不到，回傳錯誤訊息，後面不執行
@@ -124,7 +131,7 @@ const adminController = {
       })
       .catch(err => next(err))
   },
-  patchUser: (req, res, next) => {
+  patchUsers: (req, res, next) => {
     return User.findByPk(req.params.id)
       .then(user => {
         if (!user) throw new Error("User didn't exist!")
