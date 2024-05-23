@@ -31,6 +31,7 @@ const categoryController = {
     return Category.findByPk(req.params.id)
       .then(category => {
         if (!category) throw new Error("Category doesn't exist!")
+
         return category.update({ name })
       })
       .then(() => res.redirect('/admin/categories'))
@@ -40,6 +41,7 @@ const categoryController = {
     return Category.findByPk(req.params.id)
       .then(category => {
         if (!category) throw new Error("Category didn't exist!") // 反查，確認要刪除的類別存在，再進行下面刪除動作
+
         return category.destroy()
       })
       .then(() => res.redirect('/admin/categories'))
