@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
-const db = require('../models')
-const { User } = db
+const { User } = require('../models')
+const { localFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
   signUpPage: (req, res) => {
@@ -53,6 +53,50 @@ const userController = {
     req.flash('success_messages', '登出成功！')
     req.logout() // 使用 passport 提供的 function，把目前 session ID 對應的 session 清除，對 server 而言就是登出了
     res.redirect('/signin')
+  },
+  getUser: (req, res, next) => {
+    return User.findByPk(req.params.id)
+      .then(user => {
+        if (!user) throw new Error("User didn't exists!")
+
+        user = user.toJSON()
+
+        return res.render('users/profile', { user })
+      })
+      .catch(err => next(err))
+  },
+  editUser: (req, res, next) => {
+    return User.findByPk(req.params.id)
+      .then(user => {
+        if (!user) throw new Error("User didn't exists!")
+
+        return res.render('users/edit', { user: user.toJSON() })
+      })
+      .catch(err => next(err))
+  },
+  putUser: (req, res, next) => {
+    const { name } = req.body
+    const { file } = req // 把檔案取出來，也可以寫成 const file = req.file
+    if (!name) throw new Error('Restaurant name is required!')
+    if (req.user.id !== Number(req.params.id)) throw new Error('只能更改自己的資料！')
+
+    return Promise.all([
+      User.findByPk(req.params.id), // 去資料庫查有沒有這個使用者
+      localFileHandler(file) // 把取出的檔案傳給 file-helper 處理後
+    ])
+      .then(([user, filePath]) => {
+        if (!user) throw new Error("User didn't exist!")
+
+        return user.update({ // 更新使用者資訊
+          name,
+          image: filePath || user.image
+        })
+      })
+      .then(() => {
+        req.flash('success_messages', '使用者資料編輯成功')
+        res.redirect(`/users/${req.params.id}`)
+      })
+      .catch(err => next(err))
   }
 }
 

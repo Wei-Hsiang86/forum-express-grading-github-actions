@@ -1,0 +1,32 @@
+<div class="container d-none d-md-block">
+  <div class="card my-3">
+    <div class="row g-1">
+      <div class="col-md-4">
+        {{#if user.image}}
+        <img src="{{user.image}}" width="300px" height="300px" style="transition: opacity 0.5s; opacity:0;"
+          onload="this.style.opacity=1;" />
+        {{else}}
+        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Google_Chrome_icon_%28February_2022%29.svg"
+          width="300px" height="300px" style="transition: opacity 0.5s; opacity:0;" onload="this.style.opacity=1;" />
+        {{/if}}
+      </div>
+
+      <div class="col-md-8">
+        <div class="card-body">
+          <h5 class="card-title">{{user.name}}</h5>
+          <p class="card-text">{{user.email}}</p>
+
+          {{#ifCond user.id user.id}}
+          <a href="/users/{{user.id}}/edit" class="btn btn-primary">Edit</a>
+          {{/ifCond}}
+
+          <a class="btn btn-outline-secondary" href="javascript:history.back()">Back</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+{{!-- 當螢幕太小就會顯示這個，可以透過 bootstrap 來隱藏/顯示元件 --}}
+{{!-- <div class="container d-block d-md-none">
+</div> --}}

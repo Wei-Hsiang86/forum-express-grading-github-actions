@@ -32,7 +32,7 @@ app.set('view engine', 'hbs')
 
 app.use(express.urlencoded({ extended: true }))
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false })) // 使用 session
-app.use(passport.initialize()) // 初始化 Passport
+app.use(passport.initialize()) // 初始化 Passport，要在 session 後面，因為 passport 會用到 session 的功能
 app.use(passport.session()) // 啟動 session 功能
 app.use(flash()) // 掛載套件
 app.use(methodOverride('_method')) // 使用 method-override，參數名稱可自訂。另外使用套件至少要放在 listen 之前

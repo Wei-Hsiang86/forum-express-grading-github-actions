@@ -81,7 +81,7 @@ const adminController = {
   editRestaurant: (req, res, next) => {
     return Promise.all([
       Restaurant.findByPk(req.params.id, { raw: true }),
-      Category.findAll({ raw: true })
+      Category.findAll({ raw: true }) // 因為要編輯，所以需要叫出所有餐廳類別
     ])
       .then(([restaurant, categories]) => {
         if (!restaurant) throw new Error("Restaurant doesn't exist!")

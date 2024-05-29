@@ -10,7 +10,7 @@ passport.use(new LocalStrategy(
   {
     usernameField: 'email',
     passwordField: 'password',
-    passReqToCallback: true
+    passReqToCallback: true // 把 req callback (傳下去繼續使用)
   },
   // authenticate user
   (req, email, password, cb) => {
@@ -33,14 +33,16 @@ passport.use(new LocalStrategy(
 
 // serialize and deserialize user
 passport.serializeUser((user, cb) => {
+  // 回傳 user.id
   cb(null, user.id)
 })
 passport.deserializeUser((id, cb) => {
   User.findByPk(id).then(user => {
     user = user.toJSON()
     // console.log(user) // 暫時添加
-    // 透過 ocnsole 我們可以知道，其實 user 是一個 sequelize 的 instance，可以直接透過相關的語法操作
+    // 透過 console 我們可以知道，其實 user 是一個 sequelize 的 instance，可以直接透過相關的語法操作
     // 如果要傳成一般的 json，那使用 toJSON() 這個 function 即可
+    // 回傳一個物件，這個物件的名字叫做 user
     return cb(null, user)
   })
 })
