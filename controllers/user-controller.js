@@ -73,7 +73,15 @@ const userController = {
       .catch(err => next(err))
   },
   editUser: (req, res, next) => {
-    if (req.user.id !== Number(req.params.id)) throw new Error('只能編輯自己的資料！')
+    // 這裡額外錯誤處理是因為，如果直接用設定好的 error handler，會導回上一頁
+    // 但例如說 user1 直接更改網址列，試圖編輯 user2 的資料
+    // 這時候會因為導回的上一頁是 '/users/2/edit' 但實際上是到不了的
+    // 所以才會導回跟目錄 '/'，這時候 error message 也遺失了
+    // 因為導回跟目錄是第二次跳轉
+    if (req.user.id !== Number(req.params.id)) {
+      req.flash('error_messages', '只能編輯自己的資料！')
+      res.redirect(`/users/${req.user.id}`)
+    }
 
     return User.findByPk(req.params.id)
       .then(user => {
