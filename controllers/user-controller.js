@@ -63,16 +63,18 @@ const userController = {
       .then(user => {
         if (!user) throw new Error("User didn't exists!")
 
-        user = user.toJSON()
+        const userProfile = user.toJSON()
 
-        user.commentedRestaurants = user.Comments
-        // console.log(user.Comments)
+        userProfile.commentedRestaurants = userProfile.Comments
+        // console.log(userProfile.Comments)
 
-        return res.render('users/profile', { user })
+        return res.render('users/profile', { userProfile })
       })
       .catch(err => next(err))
   },
   editUser: (req, res, next) => {
+    if (req.user.id !== Number(req.params.id)) throw new Error('只能編輯自己的資料！')
+
     return User.findByPk(req.params.id)
       .then(user => {
         if (!user) throw new Error("User didn't exists!")

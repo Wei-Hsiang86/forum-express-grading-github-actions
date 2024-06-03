@@ -38,6 +38,15 @@ app.use(flash()) // 掛載套件
 app.use(methodOverride('_method')) // 使用 method-override，參數名稱可自訂。另外使用套件至少要放在 listen 之前
 app.use('/upload', express.static(path.join(__dirname, 'upload')))
 
+// 觀察用
+// app.use((req, res, next) => {
+//   console.log('req.body 有甚麼:', req.body)
+//   console.log('req.user 有甚麼:', req.user)
+//   console.log('印出 session:', req.session)
+//   console.log('印出 sessionID:', req.sessionID)
+//   next()
+// })
+
 app.use((req, res, next) => {
   res.locals.success_messages = req.flash('success_messages') // 設定 success_msg 訊息
   res.locals.error_messages = req.flash('error_messages') // 設定 warning_msg 訊息
