@@ -62,9 +62,15 @@ const restaurantController = {
     return Restaurant.findByPk(req.params.id, {
       include: [
         Category, // 拿出關聯的 Category model
-        { model: Comment, include: User }
-      ],
-      order: [[Comment, 'id', 'DESC']]
+        {
+          model: Comment,
+          include: [{
+            model: User,
+            attributes: ['id', 'name'] // Specify which user attributes you want to include [排序依據欄位名稱, 排序方式]
+          }],
+          order: [[Comment, 'id', 'DESC']] // Order comments by their id in descending order
+        }
+      ]
     })
       .then(restaurant => {
         if (!restaurant) throw new Error("Restaurant didn't exist!")
@@ -89,6 +95,31 @@ const restaurantController = {
         if (!restaurant) throw new Error("Dashboard didn't exist!")
 
         res.render('dashboard', { restaurant: restaurant.toJSON() })
+      })
+      .catch(err => next(err))
+  },
+  getFeeds: (req, res, next) => {
+    return Promise.all([
+      Restaurant.findAll({
+        limit: 10,
+        order: [['createdAt', 'DESC']], // 裡面可以放多組排序的條件，當條件一樣就換下一組
+        include: [Category],
+        raw: true,
+        nest: true
+      }),
+      Comment.findAll({
+        limit: 10,
+        order: [['createdAt', 'DESC']],
+        include: [User, Restaurant],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([restaurants, comments]) => {
+        res.render('feeds', {
+          restaurants,
+          comments
+        })
       })
       .catch(err => next(err))
   }
