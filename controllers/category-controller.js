@@ -15,6 +15,7 @@ const categoryController = {
       .catch(err => next(err))
   },
   postCategories: (req, res, next) => {
+    // console.log(req.body)
     const { name } = req.body
 
     if (!name) throw new Error('Category name is required!')
