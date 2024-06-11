@@ -1,11 +1,12 @@
 module.exports = {
   generalErrorHandler (err, req, res, next) {
-    if (req.user.id !== Number(req.params.id)) {
-      req.flash('error_messages', '只能編輯自己的資料！')
-      res.redirect(`/users/${req.user.id}`)
+    // 直接在這裡錯誤修改，可能會影響其他邏輯判斷，導致達成不期望的訊息
+    // if (req.user.id !== Number(req.params.id)) {
+    //   req.flash('error_messages', '只能編輯自己的資料！')
+    //   res.redirect(`/users/${req.user.id}`)
 
-      next(err)
-    }
+    //   next(err)
+    // }
 
     // 判斷是否為 Error 物件
     if (err instanceof Error) {

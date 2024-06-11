@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User, Restaurant, Comment } = require('../models')
+const { User, Restaurant, Comment, Favorite } = require('../models')
 const { localFileHandler } = require('../helpers/file-helpers')
 
 const userController = {
@@ -78,12 +78,14 @@ const userController = {
     // 這時候會因為並沒有 referer，依據 res.redirect('back') 如果找不到
     // 就會導回根目錄，這時候因為導回是第二次跳轉，所以 flash 就被洗掉了
     // 這裡可以透過制定額外的錯誤判斷來使 flash 訊息正確顯示
-    // if (req.user.id !== Number(req.params.id)) {
-    //   req.flash('error_messages', '只能編輯自己的資料！')
-    //   res.redirect(`/users/${req.user.id}`)
-    // }
+    if (req.user.id !== Number(req.params.id)) {
+      req.flash('error_messages', '只能編輯自己的資料！')
+      res.redirect(`/users/${req.user.id}`)
+    }
     // 或是直接在 error handler 修改，然後正常 throw error 觸發
-    if (req.user.id !== Number(req.params.id)) throw new Error('只能編輯自己的資料！')
+    // 但錯誤的邏輯判斷要做的細緻疫點，不然可能會導致不同的錯誤情景，但觸發到相同的錯誤提醒
+    // 因此選擇上面直接寫在 controller 就可以直接鎖定這樣的情況
+    // if (req.user.id !== Number(req.params.id)) throw new Error('只能編輯自己的資料！')
 
     return User.findByPk(req.params.id)
       .then(user => {
@@ -115,6 +117,44 @@ const userController = {
         req.flash('success_messages', '使用者資料編輯成功')
         res.redirect(`/users/${req.params.id}`)
       })
+      .catch(err => next(err))
+  },
+  addFavorite: (req, res, next) => {
+    const { restaurantId } = req.params
+    return Promise.all([
+      Restaurant.findByPk(restaurantId),
+      Favorite.findOne({
+        where: {
+          userId: req.user.id,
+          restaurantId
+        }
+      })
+    ])
+      .then(([restaurant, favorite]) => {
+        if (!restaurant) throw new Error("Restaurant didn't exist!")
+        if (favorite) throw new Error('You have favorited this restaurant!')
+
+        return Favorite.create({
+          userId: req.user.id,
+          restaurantId
+        })
+      })
+      .then(() => res.redirect('back'))
+      .catch(err => next(err))
+  },
+  removeFavorite: (req, res, next) => {
+    return Favorite.findOne({
+      where: {
+        userId: req.user.id,
+        restaurantId: req.params.restaurantId
+      }
+    })
+      .then(favorite => {
+        if (!favorite) throw new Error("You haven't favorited this restaurant")
+
+        return favorite.destroy()
+      })
+      .then(() => res.redirect('back'))
       .catch(err => next(err))
   }
 }
