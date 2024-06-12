@@ -1,8 +1,7 @@
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const bcrypt = require('bcryptjs')
-const db = require('../models')
-const User = db.User
+const { User, Restaurant } = require('../models')
 
 // set up Passport strategy
 passport.use(new LocalStrategy(
@@ -47,16 +46,20 @@ passport.serializeUser((user, cb) => {
 })
 
 passport.deserializeUser((id, cb) => {
-  User.findByPk(id).then(user => {
-    user = user.toJSON()
+  return User.findByPk(id, {
+    include: [
+      // as 對應到 user model 中的命名
+      { model: Restaurant, as: 'FavoritedRestaurants' }
+    ]
+  })
     // console.log(user)
     // 透過 console 我們可以知道，其實 user 是一個 sequelize 的 instance，可以直接透過相關的語法操作
     // 如果要傳成一般的 json，那使用 toJSON() 這個 function 即可把其變成單純的 json 物件
     // 另外我們會發現 req.session 所包含很多屬性，其中有一個 passport 屬性，是一個物件
-    // 而其中的屬性是 user，值為 id，而這其實是 passport 這個套件寫好的方法
+    // 而其中的屬性是 user，值為一個數字 (即為id)，而這其實是 passport 這個套件寫好的方法
     // 詳細可以看 node_modules\passport\lib\sessionmanager.js
     // 其中的 login 方法可以看到 req._passport.session.user = obj
-    return cb(null, user)
-  })
+    .then(user => cb(null, user.toJSON()))
+    .catch(err => cb(err))
 })
 module.exports = passport

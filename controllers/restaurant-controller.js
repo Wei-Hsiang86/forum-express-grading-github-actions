@@ -43,11 +43,15 @@ const restaurantController = {
       Category.findAll({ raw: true })
     ])
       .then(([restaurants, categories]) => {
+        // 把這個變數拿出來，避免再 data 的 map 中，每次都要再跑一次 fr 的 map
+        const favoritedRestaurantsId = req.user && req.user.FavoritedRestaurants.map(fr => fr.id)
+
         const data = restaurants.rows.map(r => ({
           ...r,
 
           // 使前端拿到的資料縮減
-          description: r.description.substring(0, 50)
+          description: r.description.substring(0, 50),
+          isFavorited: favoritedRestaurantsId.includes(r.id)
         }))
         return res.render('restaurants', {
           restaurants: data,
@@ -69,7 +73,8 @@ const restaurantController = {
             attributes: ['id', 'name'] // Specify which user attributes you want to include [排序依據欄位名稱, 排序方式]
           }],
           order: [[Comment, 'id', 'DESC']] // Order comments by their id in descending order
-        }
+        },
+        { model: User, as: 'FavoritedUsers' }
       ]
     })
       .then(restaurant => {
@@ -79,8 +84,14 @@ const restaurantController = {
         return restaurant.increment('viewCounts')
       })
       .then(restaurant => {
+        // 使用 some 相對於 map 而言，可以減少實際可能執行次數
+        const isFavorited = restaurant.FavoritedUsers.some(f => f.id === req.user.id)
+
         // console.log(restaurant.toJSON().Comments)
-        res.render('restaurant', { restaurant: restaurant.toJSON() })
+        res.render('restaurant', {
+          restaurant: restaurant.toJSON(),
+          isFavorited
+        })
       })
       .catch(err => next(err))
   },
