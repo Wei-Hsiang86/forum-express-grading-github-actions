@@ -45,13 +45,14 @@ const restaurantController = {
       .then(([restaurants, categories]) => {
         // 把這個變數拿出來，避免再 data 的 map 中，每次都要再跑一次 fr 的 map
         const favoritedRestaurantsId = req.user && req.user.FavoritedRestaurants.map(fr => fr.id)
-
+        const likedRestaurantsId = req.user && req.user.LikedRestaurants.map(lr => lr.id)
         const data = restaurants.rows.map(r => ({
           ...r,
 
           // 使前端拿到的資料縮減
           description: r.description.substring(0, 50),
-          isFavorited: favoritedRestaurantsId.includes(r.id)
+          isFavorited: favoritedRestaurantsId.includes(r.id),
+          isLiked: likedRestaurantsId.includes(r.id)
         }))
         return res.render('restaurants', {
           restaurants: data,
@@ -74,7 +75,8 @@ const restaurantController = {
           }],
           order: [[Comment, 'id', 'DESC']] // Order comments by their id in descending order
         },
-        { model: User, as: 'FavoritedUsers' }
+        { model: User, as: 'FavoritedUsers' },
+        { model: User, as: 'LikedUsers' }
       ]
     })
       .then(restaurant => {
@@ -86,11 +88,13 @@ const restaurantController = {
       .then(restaurant => {
         // 使用 some 相對於 map 而言，可以減少實際可能執行次數
         const isFavorited = restaurant.FavoritedUsers.some(f => f.id === req.user.id)
+        const isLiked = restaurant.LikedUsers.some(l => l.id === req.user.id)
 
         // console.log(restaurant.toJSON().Comments)
         res.render('restaurant', {
           restaurant: restaurant.toJSON(),
-          isFavorited
+          isFavorited,
+          isLiked
         })
       })
       .catch(err => next(err))
@@ -99,11 +103,14 @@ const restaurantController = {
     return Restaurant.findByPk(req.params.id, {
       include: [
         Category,
-        Comment
+        Comment,
+        { model: User, as: 'FavoritedUsers' }
       ]
     })
       .then(restaurant => {
         if (!restaurant) throw new Error("Dashboard didn't exist!")
+
+        console.log(restaurant.toJSON())
 
         res.render('dashboard', { restaurant: restaurant.toJSON() })
       })
