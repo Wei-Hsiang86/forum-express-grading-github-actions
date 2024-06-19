@@ -29,10 +29,15 @@ router.post('/signin', passport.authenticate('local', { failureRedirect: '/signi
 
 router.get('/logout', userController.logout)
 
-router.get('/restaurants/feeds', authenticated, restController.getFeeds)
+router.get('/restaurants/feeds', authenticated, restController.getFeeds) // 最新動態頁面，要放在 :id 前面，不然會被誤認為是 id
 router.get('/restaurants/:id/dashboard', authenticated, restController.getDashboard)
 router.get('/restaurants/:id', authenticated, restController.getRestaurant)
 router.get('/restaurants', authenticated, restController.getRestaurants)
+
+router.get('/users/top', authenticated, userController.getTopUsers) // 美食達人頁面
+router.get('/users/:id/edit', authenticated, userController.editUser)
+router.get('/users/:id', authenticated, userController.getUser)
+router.put('/users/:id', authenticated, upload.single('image'), userController.putUser)
 
 router.delete('/comments/:id', authenticatedAdmin, commentController.deleteComment)
 router.post('/comments', authenticated, commentController.postComment)
@@ -43,11 +48,7 @@ router.delete('/favorite/:restaurantId', authenticated, userController.removeFav
 router.post('/like/:restaurantId', authenticated, userController.addLike)
 router.delete('/like/:restaurantId', authenticated, userController.removeLike)
 
-router.get('/users/:id/edit', authenticated, userController.editUser)
-router.get('/users/:id', authenticated, userController.getUser)
-router.put('/users/:id', authenticated, upload.single('image'), userController.putUser)
-
-// 設定 fallback 路由，意義為其他路由條件都不符合時，最終會通過的路由
+// 設定 fallback 路由，意義為其他路由條件都不符合時，最終會通過的路由，並且要在 error handler 前面
 // 也就是說，當程式一路由上而下執行，萬一都匹配不到和請求相符的路徑，此時不論此 request 是用哪個 HTTP method 發出的，都會匹配到這一行
 router.get('/', (req, res) => { res.redirect('/restaurants') })
 router.use('/', generalErrorHandler)
