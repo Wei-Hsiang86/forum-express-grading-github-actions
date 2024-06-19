@@ -51,7 +51,9 @@ passport.deserializeUser((id, cb) => {
     include: [
       // as 對應到 user model 中的命名，並且命名會成為 req.user 的物件中的屬性名稱 (key 值)
       { model: Restaurant, as: 'FavoritedRestaurants' },
-      { model: Restaurant, as: 'LikedRestaurants' }
+      { model: Restaurant, as: 'LikedRestaurants' },
+      { model: User, as: 'Followers' },
+      { model: User, as: 'Followings' }
     ]
   })
     // console.log(user)
