@@ -43,7 +43,9 @@ const restaurantController = {
       Category.findAll({ raw: true })
     ])
       .then(([restaurants, categories]) => {
-        // 把這個變數拿出來，避免再 data 的 map 中，每次都要再跑一次 fr 的 map
+        // 把這個變數拿出來，避免在 data 的 map 中，每次都要再跑一次 fr 的 map
+        // 另外因為 req.user 有可能是空的，所以要寫成下方這要先做檢查
+        // 因為空陣列如果以布林表示為： true
         const favoritedRestaurantsId = req.user && req.user.FavoritedRestaurants.map(fr => fr.id)
         const likedRestaurantsId = req.user && req.user.LikedRestaurants.map(lr => lr.id)
         const data = restaurants.rows.map(r => ({
@@ -110,7 +112,8 @@ const restaurantController = {
       .then(restaurant => {
         if (!restaurant) throw new Error("Dashboard didn't exist!")
 
-        console.log(restaurant.toJSON())
+        // console.log(restaurant)
+        // console.log(restaurant.toJSON())
 
         res.render('dashboard', { restaurant: restaurant.toJSON() })
       })
@@ -138,6 +141,28 @@ const restaurantController = {
           restaurants,
           comments
         })
+      })
+      .catch(err => next(err))
+  },
+  getTopRestaurants: (req, res, next) => {
+    return Restaurant.findAll({
+      include: [{ model: User, as: 'FavoritedUsers' }]
+    })
+      .then(restaurants => {
+        const result = restaurants
+          .map(restaurant => ({
+            ...restaurant.toJSON(),
+            description: restaurant.dataValues.description.substring(0, 30),
+            favoritedCount: restaurant.FavoritedUsers.length,
+            isFavorited: req.user && req.user.FavoritedRestaurants.map(fr => fr.id).includes(restaurant.id)
+          }))
+          .sort((a, b) => b.favoritedCount - a.favoritedCount)
+
+        const topRests = result.splice(0, 10)
+
+        // console.log(topRests)
+
+        res.render('top-restaurants', { restaurants: topRests })
       })
       .catch(err => next(err))
   }

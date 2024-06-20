@@ -79,10 +79,10 @@ const userController = {
     // 就會導回根目錄，這時候因為導回是第二次跳轉，所以 flash 就被洗掉了
     // 這裡可以透過制定額外的錯誤判斷來使 flash 訊息正確顯示
     // 另外這裡會被測試程式報錯，要注意
-    if (req.user.id !== Number(req.params.id)) {
-      req.flash('error_messages', '只能編輯自己的資料！')
-      res.redirect(`/users/${req.user.id}`)
-    }
+    // if (req.user.id !== Number(req.params.id)) {
+    //   req.flash('error_messages', '只能編輯自己的資料！')
+    //   res.redirect(`/users/${req.user.id}`)
+    // }
     // 或是直接在 error handler 修改，然後正常 throw error 觸發
     // 但錯誤的邏輯判斷要做的細緻疫點，不然可能會導致不同的錯誤情景，但觸發到相同的錯誤提醒
     // 因此選擇上面直接寫在 controller 就可以直接鎖定這樣的情況
