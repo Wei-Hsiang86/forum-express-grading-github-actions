@@ -35,3 +35,5 @@ npm run test
   * password: 12345678
 
 ## 功能介紹
+請至連結觀看
+https://youtu.be/66t9y1QhPOs
