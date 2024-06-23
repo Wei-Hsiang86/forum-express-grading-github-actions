@@ -57,18 +57,23 @@ const userController = {
   getUser: (req, res, next) => {
     return User.findByPk(req.params.id, {
       include: [
-        { model: Comment, include: Restaurant }
+        { model: Comment, include: Restaurant },
+        { model: Restaurant, as: 'FavoritedRestaurants' },
+        { model: User, as: 'Followers' },
+        { model: User, as: 'Followings' }
       ]
     })
-      .then(userData => {
-        if (!userData) throw new Error("User didn't exists!")
+      .then(user => {
+        if (!user) throw new Error("User didn't exists!")
 
-        const user = userData.toJSON()
+        const userProfile = user.toJSON()
+        // console.log(userProfile)
 
-        user.commentedRestaurants = user.Comments
-        // console.log(userProfile.Comments)
+        const isFollowed = req.user.Followings.some(d => d.id === userProfile.id)
 
-        return res.render('users/profile', { user })
+        // 這裡也會被測試偵測到錯誤，測試要求傳到 handlebar 的資料名稱要為 user
+        // 但這樣會導致 header 使用者名稱會依據點選的使用者而變動
+        return res.render('users/profile', { userProfile, isFollowed })
       })
       .catch(err => next(err))
   },

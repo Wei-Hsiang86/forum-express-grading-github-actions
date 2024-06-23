@@ -1,3 +1,4 @@
+{{!-- profile --}}
 <div class="container d-none d-md-block">
   <div class="card my-3">
     <div class="row g-1">
@@ -27,16 +28,35 @@
   </div>
 </div>
 
-<div class="row">
-  <div class="col">
+{{!-- relative information --}}
+<div class="row mt-2">
+  <div class="col-6">
     <div class="card">
       <div class="card-header">
-        <strong>{{userProfile.commentedRestaurants.length}}</strong> 已評論餐廳
+        <strong>{{userProfile.Comments.length}}</strong> 已評論餐廳
       </div>
+
       <div class="card-body">
-        {{#each userProfile.commentedRestaurants}}
+        {{#each userProfile.Comments}}
         <a href="/restaurants/{{this.Restaurant.id}}" class="text-decoration-none">
-          <img src={{this.Restaurant.image}} width="100" height="100" class="avatar"
+          <img src={{this.Restaurant.image}} width="75" height="75" class="avatar"
+            style="transition: opacity 0.5s; opacity:0;" onload="this.style.opacity=1;" />
+        </a>
+        {{/each}}
+      </div>
+    </div>
+  </div>  
+
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">
+        <strong>{{userProfile.FavoritedRestaurants.length}}</strong> 收藏的餐廳
+      </div>
+
+      <div class="card-body">
+        {{#each userProfile.FavoritedRestaurants}}
+        <a href="/restaurants/{{this.id}}" class="text-decoration-none">
+          <img src={{this.image}} width="75" height="75" class="avatar"
             style="transition: opacity 0.5s; opacity:0;" onload="this.style.opacity=1;" />
         </a>
         {{/each}}
@@ -44,6 +64,43 @@
     </div>
   </div>
 </div>
-  {{!-- 當螢幕太小就會顯示這個，可以透過 bootstrap 來隱藏/顯示元件 --}}
-  {{!-- <div class="container d-block d-md-none">
-  </div> --}}
+
+<div class="row mt-2">
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">
+        <strong>{{userProfile.Followers.length}}</strong> followers (追隨者)
+      </div>
+
+      <div class="card-body">
+        {{#each userProfile.Followers}}
+        <a href="/users/{{this.id}}" class="text-decoration-none">
+          <img src={{this.image}} width="75" height="75" class="avatar"
+            style="transition: opacity 0.5s; opacity:0;" onload="this.style.opacity=1;" />
+        </a>
+        {{/each}}
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-6">
+    <div class="card">
+      <div class="card-header">
+        <strong>{{userProfile.Followings.length}}</strong> followings (追蹤者)
+      </div>
+
+      <div class="card-body">
+        {{#each userProfile.Followings}}
+        <a href="/users/{{this.id}}" class="text-decoration-none">
+          <img src={{this.image}} width="75" height="75" class="avatar"
+            style="transition: opacity 0.5s; opacity:0;" onload="this.style.opacity=1;" />
+        </a>
+        {{/each}}
+      </div>
+    </div>
+  </div>  
+</div>
+
+{{!-- 當螢幕太小就會顯示這個，可以透過 bootstrap 來隱藏/顯示元件 --}}
+{{!-- <div class="container d-block d-md-none">
+</div> --}}
