@@ -1,11 +1,11 @@
-const { Restaurant, User, Category } = require('../models')
+const { Restaurant, User, Category } = require('../../models')
 // 解構賦值，等於下面幾行
 // const db = require('../models')
 // const Restaurant = db.Restaurant
 // const User = db.User
 // ...
-const { localFileHandler } = require('../helpers/file-helpers')
-const { getOffset, getPagination } = require('../helpers/pagination-helper')
+const { localFileHandler } = require('../../helpers/file-helpers')
+const { getOffset, getPagination } = require('../../helpers/pagination-helper')
 
 const adminController = {
   getRestaurants: (req, res, next) => {

@@ -11,7 +11,7 @@ const handlebarsHelpers = require('./helpers/handlebars-helpers')
 // 因為 exports 是物件型式的，所以這裡變數也要這樣設計。簡單來說就是 exports 什麼 require 就會拿到什麼
 const { getUser } = require('./helpers/auth-helpers')
 
-const routes = require('./routes')
+const { pages } = require('./routes')
 
 // 因為太常用了，所以之後的 express 把這個包在裡面，不用特別 import 了
 // const bodyParser = require('body-parser')
@@ -54,7 +54,7 @@ app.use((req, res, next) => {
   next()
 })
 
-app.use(routes)
+app.use(pages)
 
 app.listen(port, () => {
   console.info(`Example app listening on port ${port}!`)

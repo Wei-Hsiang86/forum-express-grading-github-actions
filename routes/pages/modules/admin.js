@@ -1,10 +1,10 @@
 const express = require('express')
 const router = express.Router()
 
-const adminController = require('../../controllers/admin-controller')
-const categoryController = require('../../controllers/category-controller')
+const adminController = require('../../../controllers/pages/admin-controller')
+const categoryController = require('../../../controllers/pages/category-controller')
 
-const upload = require('../../middleware/multer')
+const upload = require('../../../middleware/multer')
 
 // 路由的判斷順序很重要，其邏輯是找對相對應的路徑就會 ,mapping 進去，後續就直接忽略
 // 所以會把相對嚴格的判斷放在外面
