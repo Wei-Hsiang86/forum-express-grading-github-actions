@@ -1,5 +1,6 @@
 const { Restaurant, Category } = require('../models')
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
+const { localFileHandler } = require('../helpers/file-helpers')
 
 const adminServices = {
   getRestaurants: (req, cb) => {
@@ -26,6 +27,29 @@ const adminServices = {
           pagination: getPagination(limit, page, restaurants.count)
         })
       })
+      .catch(err => cb(err))
+  },
+  postRestaurant: (req, cb) => {
+    const { name, tel, address, openingHours, description, categoryId } = req.body
+    // 從 req.body 拿出表單裡的資料。名字是依照 input 中 name 屬性的設定
+    // 並且一樣用解構賦值的方式撰寫，避免過多的程式碼
+
+    if (!name) throw new Error('Restaurant name is required!') // name 是必填，若發先是空值就會終止程式碼，並在畫面顯示錯誤提示
+
+    // 因為 content-type 有設定成 multipart/form-data，他會把 req 拆成兩部分 req.body, req.file
+    const { file } = req
+
+    localFileHandler(file)
+      .then(filePath => Restaurant.create({ // 產生一個新的 Restaurant 物件實例，並存入資料庫
+        name,
+        tel,
+        address,
+        openingHours,
+        description,
+        image: filePath || null,
+        categoryId
+      }))
+      .then(newRestaurant => cb(null, { restaurant: newRestaurant }))
       .catch(err => cb(err))
   },
   deleteRestaurant: (req, cb) => {

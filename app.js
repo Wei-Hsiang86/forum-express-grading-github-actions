@@ -30,7 +30,10 @@ app.engine('hbs', handlebars({ extname: '.hbs', helpers: handlebarsHelpers }))
 // 設定使用 Handlebars 做為樣板引擎
 app.set('view engine', 'hbs')
 
+// setting body-parser
 app.use(express.urlencoded({ extended: true }))
+app.use(express.json())
+
 app.use(session({ secret: SESSION_SECRET, resave: false, saveUninitialized: false })) // 使用 session
 app.use(passport.initialize()) // 初始化 Passport，要在 session 後面，因為 passport 會用到 session 的功能
 app.use(passport.session()) // 啟動 session 功能
@@ -54,6 +57,7 @@ app.use((req, res, next) => {
   next()
 })
 
+// setting routes
 app.use('/api', apis)
 app.use(pages)
 
