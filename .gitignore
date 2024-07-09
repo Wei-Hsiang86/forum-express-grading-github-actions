@@ -4,4 +4,5 @@ upload/
 
 .DS_Store
 .env
+.env.example
 .idea
