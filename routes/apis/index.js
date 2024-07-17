@@ -8,14 +8,15 @@ const admin = require('./modules/admin')
 const restController = require('../../controllers/apis/restaurant-controller')
 const userController = require('../../controllers/apis/user-controller')
 
+const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth')
 const { apiErrorHandler } = require('../../middleware/error-handler')
 
-router.use('/admin', admin)
+router.use('/admin', authenticated, authenticatedAdmin, admin)
+
+router.get('/restaurants', authenticated, restController.getRestaurants)
 
 // 把 session 關掉後，passport 就不會幫忙寫 cookie，也不會去管 session
 router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
-
-router.get('/restaurants', restController.getRestaurants)
 
 router.use('/', apiErrorHandler)
 

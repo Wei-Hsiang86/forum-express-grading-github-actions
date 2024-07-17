@@ -1,3 +1,8 @@
+// 先載入，才用到 passport，才不會報錯
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
+
 const path = require('path')
 
 const express = require('express')
@@ -16,10 +21,6 @@ const { pages, apis } = require('./routes')
 // 因為太常用了，所以之後的 express 把這個包在裡面，不用特別 import 了
 // const bodyParser = require('body-parser')
 // app.use(bodyParser.urlencoded({ extended: true }))
-
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config()
-}
 
 const app = express()
 const port = process.env.PORT || 3000
