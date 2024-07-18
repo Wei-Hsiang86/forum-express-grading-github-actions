@@ -59,7 +59,7 @@ const restaurantServices = {
           isLiked: likedRestaurantsId.includes(r.id)
         }))
 
-        // 第一個參數代表如果錯誤，要傳遞的值
+        // 第一個參數代表錯誤的傳值，如果沒有就寫 null
         return cb(null, {
           restaurants: data,
           categories,
