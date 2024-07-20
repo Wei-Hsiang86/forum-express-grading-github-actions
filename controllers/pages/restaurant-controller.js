@@ -91,20 +91,23 @@ const restaurantController = {
       include: [{ model: User, as: 'FavoritedUsers' }]
     })
       .then(restaurants => {
-        const result = restaurants
-          .map(restaurant => ({
-            ...restaurant.toJSON(),
-            description: restaurant.dataValues.description.substring(0, 30),
-            favoritedCount: restaurant.FavoritedUsers.length,
-            isFavorited: req.user && req.user.FavoritedRestaurants.map(fr => fr.id).includes(restaurant.id)
-          }))
+        // console.log(restaurants[0].dataValues)
+
+        // 下面要注意，如果要用到 substring 方法，記得可能會讀到 null
+        // 又因為 null 沒有這個方法，所以會報錯
+        // 可以透過驗證的方式來避免進行到 null.substring()
+        restaurants = restaurants.map(r => ({
+          ...r.dataValues,
+          description: r.dataValues.description?.substring(0, 50),
+          favoritedCount: r.FavoritedUsers.length,
+          isFavorited: req.user && req.user.FavoritedRestaurants.map(d => d.id).includes(r.id)
+        }))
           .sort((a, b) => b.favoritedCount - a.favoritedCount)
 
-        const topRests = result.splice(0, 10)
-
+        restaurants = restaurants.slice(0, 10)
         // console.log(topRests)
 
-        res.render('top-restaurants', { restaurants: topRests })
+        res.render('top-restaurants', { restaurants })
       })
       .catch(err => next(err))
   }
