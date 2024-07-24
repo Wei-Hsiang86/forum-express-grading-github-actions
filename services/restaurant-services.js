@@ -1,6 +1,6 @@
 // services 負責與 DB 溝通，或者說負責商業邏輯運算
 
-const { Restaurant, Category } = require('../models')
+const { Restaurant, Category, User, Comment } = require('../models')
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
 
 const restaurantServices = {
@@ -69,6 +69,41 @@ const restaurantServices = {
       })
 
       // 因為有傳遞的值了，所以這裡就用 cb 把錯誤往外拋
+      .catch(err => cb(err))
+  },
+  getRestaurant: (req, cb) => {
+    return Restaurant.findByPk(req.params.id, {
+      include: [
+        Category, // 拿出關聯的 Category model
+        {
+          model: Comment,
+          include: [{
+            model: User,
+            attributes: ['id', 'name'] // Specify which user attributes you want to include [排序依據欄位名稱, 排序方式]
+          }],
+          order: [[Comment, 'id', 'DESC']] // Order comments by their id in descending order
+        },
+        { model: User, as: 'FavoritedUsers' },
+        { model: User, as: 'LikedUsers' }
+      ]
+    })
+      .then(restaurant => {
+        if (!restaurant) throw new Error("Restaurant didn't exist!")
+
+        // console.log(restaurant.Comments) // 查看輸出內容
+        return restaurant.increment('viewCounts')
+      })
+      .then(restaurant => {
+        // 使用 some 相對於 map 而言，可以減少實際可能執行次數
+        const isFavorited = restaurant.FavoritedUsers.some(f => f.id === req.user.id)
+        const isLiked = restaurant.LikedUsers.some(l => l.id === req.user.id)
+
+        return cb(null, {
+          restaurant: restaurant.toJSON(),
+          isFavorited,
+          isLiked
+        })
+      })
       .catch(err => cb(err))
   }
 }

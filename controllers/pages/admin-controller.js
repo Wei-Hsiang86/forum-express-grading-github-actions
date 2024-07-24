@@ -4,7 +4,6 @@ const { Restaurant, User, Category } = require('../../models')
 // const Restaurant = db.Restaurant
 // const User = db.User
 // ...
-const { localFileHandler } = require('../../helpers/file-helpers')
 const adminServices = require('../../services/admin-services')
 
 const adminController = {
@@ -23,21 +22,12 @@ const adminController = {
       if (err) return next(err)
 
       req.flash('success_messages', 'restaurant was successfully created')
-      res.redirect('/admin/restaurants', data)
+      req.session.createdData = data
+      res.redirect('/admin/restaurants')
     })
   },
   getRestaurant: (req, res, next) => {
-    Restaurant.findByPk(req.params.id, { // 去資料庫用 id 找一筆資料 (依據路徑的名字為屬性名稱)
-      raw: true, // 找到以後整理格式再回傳
-      nest: true,
-      include: [Category]
-    })
-      .then(restaurant => {
-        if (!restaurant) throw new Error("Restaurant didn't exist!") //  如果找不到，回傳錯誤訊息，後面不執行
-
-        res.render('admin/restaurant', { restaurant })
-      })
-      .catch(err => next(err))
+    adminServices.getRestaurant(req, (err, data) => err ? next(err) : res.render('admin/restaurant', data))
   },
   editRestaurant: (req, res, next) => {
     return Promise.all([
@@ -52,37 +42,22 @@ const adminController = {
       .catch(err => next(err))
   },
   putRestaurant: (req, res, next) => {
-    const { name, tel, address, openingHours, description, categoryId } = req.body
-    // 一樣確保 name 欄位有填入資料
-    if (!name) throw new Error('Restaurant name is required!')
+    adminServices.putRestaurant(req, (err, data) => {
+      if (err) return next(err)
 
-    const { file } = req // 把檔案取出來
-
-    Promise.all([ // 非同步處理，只須等最久的那個就好(類似平行處理)
-      Restaurant.findByPk(req.params.id), // 去資料庫查有沒有這間餐廳
-      localFileHandler(file) // 把檔案傳到 file-helper 處理
-    ])
-      .then(([restaurant, filePath]) => { // 以上兩樣事都做完以後
-        if (!restaurant) throw new Error("Restaurant didn't exist!")
-
-        return restaurant.update({ // 修改這筆資料
-          name,
-          tel,
-          address,
-          openingHours,
-          description,
-          image: filePath || restaurant.image, // 如果 filePath 是 Truthy (使用者有上傳新照片) 就用 filePath，是 Falsy (使用者沒有上傳新照片) 就沿用原本資料庫內的值
-          categoryId
-        })
-      })
-      .then(() => {
-        req.flash('success_messages', 'restaurant was successfully to update')
-        res.redirect('/admin/restaurants')
-      })
-      .catch(err => next(err))
+      req.flash('success_messages', 'restaurant was successfully to update')
+      // console.log(data)
+      req.session.deletedData = data
+      res.redirect('/admin/restaurants')
+    })
   },
   deleteRestaurant: (req, res, next) => {
-    adminServices.deleteRestauran(req, (err, data) => err ? next(err) : res.redirect('/admin/restaurants', data))
+    adminServices.deleteRestaurant(req, (err, data) => {
+      if (err) return next(err)
+
+      req.flash('success_messages', 'restaurant was deleted')
+      res.redirect('/admin/restaurants')
+    })
   },
   getUsers: (req, res, next) => {
     return User.findAll({

@@ -49,7 +49,7 @@ const adminServices = {
         image: filePath || null,
         categoryId
       }))
-      .then(newRestaurant => cb(null, { restaurant: newRestaurant }))
+      .then(newRestaurant => cb(null, { newRestaurant }))
       .catch(err => cb(err))
   },
   deleteRestaurant: (req, cb) => {
@@ -60,6 +60,46 @@ const adminServices = {
         return restaurant.destroy()
       })
       .then(deletedRestaurant => cb(null, { restaurant: deletedRestaurant }))
+      .catch(err => cb(err))
+  },
+  getRestaurant: (req, cb) => {
+    return Restaurant.findByPk(req.params.id, { // 去資料庫用 id 找一筆資料 (依據路徑的名字為屬性名稱)
+      raw: true, // 找到以後整理格式再回傳
+      nest: true,
+      include: [Category]
+    })
+      .then(restaurant => {
+        if (!restaurant) throw new Error("Restaurant didn't exist!") //  如果找不到，回傳錯誤訊息，後面不執行
+
+        return cb(null, { restaurant })
+      })
+      .catch(err => cb(err))
+  },
+  putRestaurant: (req, cb) => {
+    const { name, tel, address, openingHours, description, categoryId } = req.body
+    // 一樣確保 name 欄位有填入資料
+    if (!name) throw new Error('Restaurant name is required!')
+
+    const { file } = req // 把檔案取出來
+
+    Promise.all([ // 非同步處理，只須等最久的那個就好(類似平行處理)
+      Restaurant.findByPk(req.params.id), // 去資料庫查有沒有這間餐廳
+      localFileHandler(file) // 把檔案傳到 file-helper 處理
+    ])
+      .then(([restaurant, filePath]) => { // 以上兩樣事都做完以後
+        if (!restaurant) throw new Error("Restaurant didn't exist!")
+
+        return restaurant.update({ // 修改這筆資料
+          name,
+          tel,
+          address,
+          openingHours,
+          description,
+          image: filePath || restaurant.image, // 如果 filePath 是 Truthy (使用者有上傳新照片) 就用 filePath，是 Falsy (使用者沒有上傳新照片) 就沿用原本資料庫內的值
+          categoryId
+        })
+      })
+      .then(editedRestaurant => cb(null, { editedRestaurant }))
       .catch(err => cb(err))
   }
 }
