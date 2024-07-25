@@ -105,6 +105,72 @@ const restaurantServices = {
         })
       })
       .catch(err => cb(err))
+  },
+  getDashboard: (req, cb) => {
+    return Restaurant.findByPk(req.params.id, {
+      include: [
+        Category,
+        Comment,
+        { model: User, as: 'FavoritedUsers' }
+      ]
+    })
+      .then(restaurant => {
+        if (!restaurant) throw new Error("Dashboard didn't exist!")
+        // console.log(restaurant)
+        // console.log(restaurant.toJSON())
+
+        return cb(null, { restaurant: restaurant.toJSON() })
+      })
+      .catch(err => cb(err))
+  },
+  getFeeds: (req, cb) => {
+    return Promise.all([
+      Restaurant.findAll({
+        limit: 10,
+        order: [['createdAt', 'DESC']], // 裡面可以放多組排序的條件，當條件一樣就換下一組
+        include: [Category],
+        raw: true,
+        nest: true
+      }),
+      Comment.findAll({
+        limit: 10,
+        order: [['createdAt', 'DESC']],
+        include: [User, Restaurant],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([restaurants, comments]) => {
+        return cb(null, {
+          restaurants,
+          comments
+        })
+      })
+      .catch(err => cb(err))
+  },
+  getTopRestaurants: (req, cb) => {
+    return Restaurant.findAll({
+      include: [{ model: User, as: 'FavoritedUsers' }]
+    })
+      .then(restaurants => {
+        // console.log(restaurants[0].dataValues)
+
+        // 下面要注意，如果要用到 substring 方法，記得可能會讀到 null
+        // 又因為 null 沒有這個方法，所以會報錯
+        // 可以透過驗證的方式來避免進行到 null.substring()
+        restaurants = restaurants.map(r => ({
+          ...r.dataValues,
+          description: r.dataValues.description?.substring(0, 50),
+          favoritedCount: r.FavoritedUsers.length,
+          isFavorited: req.user && req.user.FavoritedRestaurants.map(d => d.id).includes(r.id)
+        }))
+          .sort((a, b) => b.favoritedCount - a.favoritedCount)
+
+        restaurants = restaurants.slice(0, 10)
+
+        return cb(null, { restaurants })
+      })
+      .catch(err => cb(err))
   }
 }
 module.exports = restaurantServices

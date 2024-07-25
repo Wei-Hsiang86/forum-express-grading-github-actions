@@ -1,6 +1,5 @@
 // controller 處理流程控制，負責接收資料來源及整理回傳結果
 
-const { Restaurant, Category, Comment, User } = require('../../models')
 const restaurantServices = require('../../services/restaurant-services')
 
 const restaurantController = {
@@ -11,72 +10,13 @@ const restaurantController = {
     restaurantServices.getRestaurant(req, (err, data) => err ? next(err) : res.render('restaurant', data))
   },
   getDashboard: (req, res, next) => {
-    return Restaurant.findByPk(req.params.id, {
-      include: [
-        Category,
-        Comment,
-        { model: User, as: 'FavoritedUsers' }
-      ]
-    })
-      .then(restaurant => {
-        if (!restaurant) throw new Error("Dashboard didn't exist!")
-
-        // console.log(restaurant)
-        // console.log(restaurant.toJSON())
-
-        res.render('dashboard', { restaurant: restaurant.toJSON() })
-      })
-      .catch(err => next(err))
+    restaurantServices.getDashboard(req, (err, data) => err ? next(err) : res.render('dashboard', data))
   },
   getFeeds: (req, res, next) => {
-    return Promise.all([
-      Restaurant.findAll({
-        limit: 10,
-        order: [['createdAt', 'DESC']], // 裡面可以放多組排序的條件，當條件一樣就換下一組
-        include: [Category],
-        raw: true,
-        nest: true
-      }),
-      Comment.findAll({
-        limit: 10,
-        order: [['createdAt', 'DESC']],
-        include: [User, Restaurant],
-        raw: true,
-        nest: true
-      })
-    ])
-      .then(([restaurants, comments]) => {
-        res.render('feeds', {
-          restaurants,
-          comments
-        })
-      })
-      .catch(err => next(err))
+    restaurantServices.getFeeds(req, (err, data) => err ? next(err) : res.render('feeds', data))
   },
   getTopRestaurants: (req, res, next) => {
-    return Restaurant.findAll({
-      include: [{ model: User, as: 'FavoritedUsers' }]
-    })
-      .then(restaurants => {
-        // console.log(restaurants[0].dataValues)
-
-        // 下面要注意，如果要用到 substring 方法，記得可能會讀到 null
-        // 又因為 null 沒有這個方法，所以會報錯
-        // 可以透過驗證的方式來避免進行到 null.substring()
-        restaurants = restaurants.map(r => ({
-          ...r.dataValues,
-          description: r.dataValues.description?.substring(0, 50),
-          favoritedCount: r.FavoritedUsers.length,
-          isFavorited: req.user && req.user.FavoritedRestaurants.map(d => d.id).includes(r.id)
-        }))
-          .sort((a, b) => b.favoritedCount - a.favoritedCount)
-
-        restaurants = restaurants.slice(0, 10)
-        // console.log(topRests)
-
-        res.render('top-restaurants', { restaurants })
-      })
-      .catch(err => next(err))
+    restaurantServices.getTopRestaurants(req, (err, data) => err ? next(err) : res.render('top-restaurants', data))
   }
 }
 module.exports = restaurantController
