@@ -6,14 +6,13 @@ const categoryController = {
     categoryServices.getCategories(req, (err, data) => err ? next(err) : res.render('admin/categories', data))
   },
   postCategories: (req, res, next) => {
-    // console.log(req.body)
-    const { name } = req.body
+    categoryServices.postCategories(req, (err, data) => {
+      if (err) return next(err)
 
-    if (!name) throw new Error('Category name is required!')
-
-    return Category.create({ name })
-      .then(() => res.redirect('/admin/categories'))
-      .catch(err => next(err))
+      req.flash('success_messages', 'category was successfully created')
+      req.session.updatedData = data
+      res.redirect('/admin/categories')
+    })
   },
   putCategory: (req, res, next) => {
     categoryServices.putCategory(req, (err, data) => {
@@ -25,14 +24,13 @@ const categoryController = {
     })
   },
   deleteCategory: (req, res, next) => {
-    return Category.findByPk(req.params.id)
-      .then(category => {
-        if (!category) throw new Error("Category didn't exist!") // 反查，確認要刪除的類別存在，再進行下面刪除動作
+    categoryServices.deleteCategory(req, (err, data) => {
+      if (err) return next(err)
 
-        return category.destroy()
-      })
-      .then(() => res.redirect('/admin/categories'))
-      .catch(err => next(err))
+      req.flash('success_messages', 'category was deleted')
+      req.session.updatedData = data
+      res.redirect('/admin/categories')
+    })
   }
 }
 module.exports = categoryController

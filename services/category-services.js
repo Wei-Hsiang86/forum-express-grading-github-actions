@@ -14,19 +14,20 @@ const categoryServices = {
       })
       .catch(err => cb(err))
   },
-  postCategories: (req, res, next) => {
-    // console.log(req.body)
+  postCategories: (req, cb) => {
     const { name } = req.body
+    // console.log(req.body)
 
     if (!name) throw new Error('Category name is required!')
 
     return Category.create({ name })
-      .then(() => res.redirect('/admin/categories'))
-      .catch(err => next(err))
+      .then(editedCategory => cb(null, { editedCategory }))
+      .catch(err => cb(err))
   },
   putCategory: (req, cb) => {
     const { name } = req.body
     // console.log(req.body)
+    // console.log(req)
 
     if (!name) throw new Error('Category name is required!')
 
@@ -37,6 +38,16 @@ const categoryServices = {
         return category.update({ name })
       })
       .then(editedCategory => cb(null, { editedCategory }))
+      .catch(err => cb(err))
+  },
+  deleteCategory: (req, cb) => {
+    return Category.findByPk(req.params.id)
+      .then(category => {
+        if (!category) throw new Error("Category didn't exist!") // 反查，確認要刪除的類別存在，再進行下面刪除動作
+
+        return category.destroy()
+      })
+      .then(deletedCategory => cb(null, { deletedCategory }))
       .catch(err => cb(err))
   }
 }

@@ -1,6 +1,6 @@
 const fs = require('fs') // 引入 fs 模組
 
-const localFileHandler = file => { // file 是 multer 處理完的檔案
+const localFileHandler = file => { // file 是 multer 處理完的檔案，由 multer 默認設定的
   return new Promise((resolve, reject) => {
     if (!file) return resolve(null) // return 就會結束這個 function
 

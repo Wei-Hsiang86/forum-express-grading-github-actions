@@ -80,6 +80,7 @@ const adminServices = {
     // 一樣確保 name 欄位有填入資料
     if (!name) throw new Error('Restaurant name is required!')
 
+    // console.log(file)
     const { file } = req // 把檔案取出來
 
     Promise.all([ // 非同步處理，只須等最久的那個就好(類似平行處理)
