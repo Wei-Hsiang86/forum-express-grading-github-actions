@@ -7,6 +7,7 @@ const admin = require('./modules/admin')
 
 const restController = require('../../controllers/apis/restaurant-controller')
 const userController = require('../../controllers/apis/user-controller')
+const commentController = require('../../controllers/apis/comment-controller')
 
 const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth')
 const { apiErrorHandler } = require('../../middleware/error-handler')
@@ -23,6 +24,12 @@ router.get('/restaurants/top', authenticated, restController.getTopRestaurants) 
 router.get('/restaurants/:id/dashboard', authenticated, restController.getDashboard)
 router.get('/restaurants/:id', authenticated, restController.getRestaurant)
 router.get('/restaurants', authenticated, restController.getRestaurants)
+
+router.delete('/comments/:id', authenticatedAdmin, commentController.deleteComment)
+router.post('/comments', authenticated, commentController.postComment)
+
+// router.post('/favorite/:restaurantId', authenticated, userController.addFavorite)
+// router.delete('/favorite/:restaurantId', authenticated, userController.removeFavorite)
 
 router.use('/', apiErrorHandler)
 

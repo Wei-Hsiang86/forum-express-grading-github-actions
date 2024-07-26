@@ -8,7 +8,7 @@ const categoryController = {
     categoryServices.postCategories(req, (err, data) => {
       if (err) return next(err)
 
-      req.flash('success_messages', 'category was successfully created')
+      req.flash('success_messages', 'Category was successfully created')
       req.session.updatedData = data
       res.redirect('/admin/categories')
     })
@@ -17,7 +17,7 @@ const categoryController = {
     categoryServices.putCategory(req, (err, data) => {
       if (err) return next(err)
 
-      req.flash('success_messages', 'category was successfully to update')
+      req.flash('success_messages', 'Category was successfully to update')
       req.session.updatedData = data
       res.redirect('/admin/categories')
     })
@@ -26,7 +26,7 @@ const categoryController = {
     categoryServices.deleteCategory(req, (err, data) => {
       if (err) return next(err)
 
-      req.flash('success_messages', 'category was deleted')
+      req.flash('success_messages', 'Category was deleted')
       req.session.updatedData = data
       res.redirect('/admin/categories')
     })

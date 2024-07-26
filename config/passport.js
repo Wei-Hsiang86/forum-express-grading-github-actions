@@ -11,7 +11,7 @@ const ExtractJWT = passportJWT.ExtractJwt
 // set up Passport strategy
 passport.use(new LocalStrategy(
   // customize user field
-  // 當 column name 名稱跟默認的不同 (_username_ㄝ, _password_)，可以額外設定
+  // 當 column name 名稱跟默認的不同 (_username_, _password_)，可以額外設定
   // when `true`, `req` is the first argument to the verify callback (default: `false`)
   // 把 req callback (傳下去繼續使用)
   {

@@ -21,7 +21,7 @@ const adminController = {
     adminServices.getRestaurants(req, (err, data) => {
       if (err) return next(err)
 
-      req.flash('success_messages', 'restaurant was successfully created')
+      req.flash('success_messages', 'Restaurant was successfully created')
       req.session.createdData = data
       res.redirect('/admin/restaurants')
     })
@@ -45,7 +45,7 @@ const adminController = {
     adminServices.putRestaurant(req, (err, data) => {
       if (err) return next(err)
 
-      req.flash('success_messages', 'restaurant was successfully to update')
+      req.flash('success_messages', 'Restaurant was successfully to update')
       // console.log(data)
       req.session.deletedData = data
       res.redirect('/admin/restaurants')
@@ -55,7 +55,7 @@ const adminController = {
     adminServices.deleteRestaurant(req, (err, data) => {
       if (err) return next(err)
 
-      req.flash('success_messages', 'restaurant was deleted')
+      req.flash('success_messages', 'Restaurant was deleted')
       res.redirect('/admin/restaurants')
     })
   },
