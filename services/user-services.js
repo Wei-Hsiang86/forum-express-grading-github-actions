@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User } = require('../models')
+const { User, Restaurant, Favorite } = require('../models')
 
 const userServices = {
   signUp: (req, cb) => {
@@ -29,12 +29,48 @@ const userServices = {
           password: hash
         })
       })
-      .then(data => {
-        return cb(null, data)
-      })
+      .then(data => cb(null, data))
       .catch(err => cb(err))
       // 在 express 中，next() 如果有參數，就代表拋出錯誤
       // 接住前面拋出的錯誤，呼叫專門做錯誤處理的 middleware
+  },
+  addFavorite: (req, cb) => {
+    const { restaurantId } = req.params
+    return Promise.all([
+      Restaurant.findByPk(restaurantId),
+      Favorite.findOne({
+        where: {
+          userId: req.user.id,
+          restaurantId
+        }
+      })
+    ])
+      .then(([restaurant, favorite]) => {
+        if (!restaurant) throw new Error("Restaurant didn't exist!")
+        if (favorite) throw new Error('You have favorited this restaurant!')
+
+        return Favorite.create({
+          userId: req.user.id,
+          restaurantId
+        })
+      })
+      .then(newFavorite => cb(null, newFavorite))
+      .catch(err => cb(err))
+  },
+  removeFavorite: (req, cb) => {
+    return Favorite.findOne({
+      where: {
+        userId: req.user.id,
+        restaurantId: req.params.restaurantId
+      }
+    })
+      .then(favorite => {
+        if (!favorite) throw new Error("You haven't favorited this restaurant")
+
+        return favorite.destroy()
+      })
+      .then(rmFavorite => cb(null, rmFavorite))
+      .catch(err => cb(err))
   }
 }
 

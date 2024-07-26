@@ -1,4 +1,4 @@
-const { User, Restaurant, Comment, Favorite, Like, Followship } = require('../../models')
+const { User, Restaurant, Comment, Like, Followship } = require('../../models')
 const { localFileHandler } = require('../../helpers/file-helpers')
 const userServices = require('../../services/user-services')
 
@@ -99,42 +99,22 @@ const userController = {
       .catch(err => next(err))
   },
   addFavorite: (req, res, next) => {
-    const { restaurantId } = req.params
-    return Promise.all([
-      Restaurant.findByPk(restaurantId),
-      Favorite.findOne({
-        where: {
-          userId: req.user.id,
-          restaurantId
-        }
-      })
-    ])
-      .then(([restaurant, favorite]) => {
-        if (!restaurant) throw new Error("Restaurant didn't exist!")
-        if (favorite) throw new Error('You have favorited this restaurant!')
+    userServices.addFavorite(req, (err, data) => {
+      if (err) return next(err)
 
-        return Favorite.create({
-          userId: req.user.id,
-          restaurantId
-        })
-      })
-      .then(() => res.redirect('back'))
-      .catch(err => next(err))
+      req.flash('success_messages', 'Add new favorite restaurant~')
+      req.session.updatedData = data
+      res.redirect('back')
+    })
   },
   removeFavorite: (req, res, next) => {
-    return Favorite.findOne({
-      where: {
-        userId: req.user.id,
-        restaurantId: req.params.restaurantId
-      }
-    })
-      .then(favorite => {
-        if (!favorite) throw new Error("You haven't favorited this restaurant")
+    userServices.removeFavorite(req, (err, data) => {
+      if (err) return next(err)
 
-        return favorite.destroy()
-      })
-      .then(() => res.redirect('back'))
-      .catch(err => next(err))
+      req.flash('success_messages', 'Remove favorited restaurant')
+      req.session.updatedData = data
+      res.redirect('back')
+    })
   },
   addLike: (req, res, next) => {
     const { restaurantId } = req.params
