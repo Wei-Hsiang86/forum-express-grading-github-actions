@@ -36,7 +36,7 @@ const adminServices = {
 
     if (!name) throw new Error('Restaurant name is required!') // name 是必填，若發先是空值就會終止程式碼，並在畫面顯示錯誤提示
 
-    // 因為 content-type 有設定成 multipart/form-data，他會把 req 拆成兩部分 req.body, req.file
+    // 因為 content-type 有設定成 multipart/form-data，透過 multer 把 req 拆成兩部分 req.body, req.file
     const { file } = req
 
     localFileHandler(file)
